@@ -1,52 +1,31 @@
 resource "oci_apigateway_api" "this" {
   count          = length(var.api)
-  compartment_id = var.compartment_id
+  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.api[count.index], "compartment_id")))
   content        = lookup(var.api[count.index], "content")
-  defined_tags = merge(
-    var.defined_tags,
-    lookup(var.api[count.index], "defined_tags")
-  )
-  display_name = lookup(var.api[count.index], "display_name")
-  freeform_tags = merge(
-    var.freeform_tags,
-    lookup(var.api[count.index], "freeform_tags")
-  )
+  defined_tags   = merge(var.defined_tags, lookup(var.api[count.index], "defined_tags"))
+  display_name   = lookup(var.api[count.index], "display_name")
+  freeform_tags  = merge(var.freeform_tags, lookup(var.api[count.index], "freeform_tags"))
 }
 
 resource "oci_apigateway_certificate" "this" {
-  count          = length(var.certificate)
-  certificate    = lookup(var.certificate[count.index], "certificate")
-  compartment_id = data.oci_identity_compartment.this.compartment_id
-  private_key    = lookup(var.certificate[count.index], "private_key")
-  defined_tags = merge(
-    var.defined_tags,
-    lookup(var.certificate[count.index], "defined_tags")
-  )
-  display_name = lookup(var.certificate[count.index], "display_name")
-  freeform_tags = merge(
-    var.freeform_tags,
-    lookup(var.certificate[count.index], "freeform_tags")
-  )
+  count                     = length(var.certificate)
+  certificate               = lookup(var.certificate[count.index], "certificate")
+  compartment_id            = try(element(module.identity.*.compartment_id, lookup(var.certificate[count.index], "compartment_id")))
+  private_key               = lookup(var.certificate[count.index], "private_key")
+  defined_tags              = merge(var.defined_tags, lookup(var.certificate[count.index], "defined_tags"))
+  display_name              = lookup(var.certificate[count.index], "display_name")
+  freeform_tags             = merge(var.freeform_tags, lookup(var.certificate[count.index], "freeform_tags"))
   intermediate_certificates = lookup(var.certificate[count.index], "intermediate_certificates")
 }
 
 resource "oci_apigateway_deployment" "this" {
-  count          = length(var.deployment) == "0" ? "0" : length(var.gateway)
-  compartment_id = data.oci_identity_compartment.this.compartment_id
-  gateway_id = try(
-    data.oci_apigateway_gateway.this.gateway_id,
-    element(oci_apigateway_gateway.this.*.id, lookup(var.deployment[count.index], "gateway_id"))
-  )
-  path_prefix  = lookup(var.deployment[count.index], "path_prefix")
-  display_name = lookup(var.deployment[count.index], "display_name")
-  defined_tags = merge(
-    var.defined_tags,
-    lookup(var.deployment[count.index], "defined_tags")
-  )
-  freeform_tags = merge(
-    var.freeform_tags,
-    lookup(var.deployment[count.index], "freeform_tags")
-  )
+  count          = length(var.gateway) == "0" ? "0" : length(var.deployment)
+  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.deployment[count.index], "compartment_id")))
+  gateway_id     = try(element(oci_apigateway_gateway.this.*.id, lookup(var.deployment[count.index], "gateway_id")))
+  path_prefix    = lookup(var.deployment[count.index], "path_prefix")
+  display_name   = lookup(var.deployment[count.index], "display_name")
+  defined_tags   = merge(var.defined_tags, lookup(var.deployment[count.index], "defined_tags"))
+  freeform_tags  = merge(var.freeform_tags, lookup(var.deployment[count.index], "freeform_tags"))
 
   dynamic "specification" {
     for_each = lookup(var.deployment[count.index], "specification") == null ? [] : ["specification"]
@@ -790,23 +769,14 @@ resource "oci_apigateway_deployment" "this" {
 }
 
 resource "oci_apigateway_gateway" "this" {
-  count          = length(var.gateway)
-  compartment_id = data.oci_identity_compartment.this.compartment_id
-  endpoint_type  = lookup(var.gateway[count.index], "endpoint_type")
-  subnet_id      = data.oci_core_subnet.this.subnet_id
-  certificate_id = try(
-    data.oci_apigateway_certificate.this.certificate_id,
-    element(oci_apigateway_certificate.this.*.id, lookup(var.gateway[count.index], "certificate_id"))
-  )
-  defined_tags = merge(
-    var.defined_tags,
-    lookup(var.gateway[count.index], "defined_tags")
-  )
-  display_name = lookup(var.gateway[count.index], "display_name")
-  freeform_tags = merge(
-    var.freeform_tags,
-    lookup(var.gateway[count.index], "freeform_tags")
-  )
+  count                      = length(var.certificate) == 0 ? 0 : length(var.gateway)
+  compartment_id             = try(element(module.identity.*.compartment_id, lookup(var.gateway[count.index], "compartment_id")))
+  endpoint_type              = lookup(var.gateway[count.index], "endpoint_type")
+  subnet_id                  = data.oci_core_subnet.this.subnet_id
+  certificate_id             = try(element(oci_apigateway_certificate.this.*.id, lookup(var.gateway[count.index], "certificate_id")))
+  defined_tags               = merge(var.defined_tags, lookup(var.gateway[count.index], "defined_tags"))
+  display_name               = lookup(var.gateway[count.index], "display_name")
+  freeform_tags              = merge(var.freeform_tags, lookup(var.gateway[count.index], "freeform_tags"))
   network_security_group_ids = lookup(var.gateway[count.index], "network_security_group_ids")
 
   dynamic "ca_bundles" {
@@ -842,41 +812,28 @@ resource "oci_apigateway_gateway" "this" {
 }
 
 resource "oci_apigateway_subscriber" "this" {
-  count          = length(var.subscriber) == "0" ? "0" : length(var.usage_plans)
-  compartment_id = data.oci_identity_compartment.this.compartment_id
+  count          = length(var.usage_plans) == "0" ? "0" : length(var.subscriber)
+  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.subscriber[count.index], "compartment_id")))
   usage_plans    = lookup(var.subscriber[count.index], "usage_plans")
-  defined_tags = merge(
-    var.defined_tags,
-    lookup(var.subscriber[count.index], "defined_tags")
-  )
-  display_name = lookup(var.subscriber[count.index], "display_name")
-  freeform_tags = merge(
-    var.freeform_tags,
-    lookup(var.subscriber[count.index], "freeform_tags")
-  )
+  defined_tags   = merge(var.defined_tags, lookup(var.subscriber[count.index], "defined_tags"))
+  display_name   = lookup(var.subscriber[count.index], "display_name")
+  freeform_tags  = merge(var.freeform_tags, lookup(var.subscriber[count.index], "freeform_tags"))
 
   dynamic "clients" {
     for_each = lookup(var.subscriber[count.index], "clients")
     content {
       name  = lookup(clients.value, "name")
       token = lookup(clients.value, "token")
-
     }
   }
 }
 
 resource "oci_apigateway_usage_plan" "this" {
   count          = length(var.usage_plans)
-  compartment_id = data.oci_identity_compartment.this.compartment_id
-  defined_tags = merge(
-    var.defined_tags,
-    lookup(var.usage_plans[count.index], "defined_tags")
-  )
-  display_name = lookup(var.usage_plans[count.index], "display_name")
-  freeform_tags = merge(
-    var.freeform_tags,
-    lookup(var.usage_plans[count.index], "freeform_tags")
-  )
+  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.usage_plans[count.index], "compartment_id")))
+  defined_tags   = merge(var.defined_tags, lookup(var.usage_plans[count.index], "defined_tags"))
+  display_name   = lookup(var.usage_plans[count.index], "display_name")
+  freeform_tags  = merge(var.freeform_tags, lookup(var.usage_plans[count.index], "freeform_tags"))
 
   dynamic "entitlements" {
     for_each = lookup(var.usage_plans[count.index], "entitlements")
@@ -905,10 +862,7 @@ resource "oci_apigateway_usage_plan" "this" {
       dynamic "targets" {
         for_each = lookup(entitlements.value, "targets") == null ? [] : ["targets"]
         content {
-          deployment_id = try(
-            data.oci_apigateway_deployment.this.deployment_id,
-            element(oci_apigateway_deployment.this.*.id, lookup(targets.value, "deployment_id"))
-          )
+          deployment_id = try(element(oci_apigateway_deployment.this.*.id, lookup(targets.value, "deployment_id")))
         }
       }
     }

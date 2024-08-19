@@ -1,52 +1,37 @@
-variable "gateway_id" {
-  type    = string
-  default = null
-  description = "Gateway_id value to be used as datasource - if defined"
-}
-
-variable "deployment_id" {
-  type    = string
-  default = null
-  description = "Deployment_id value to be used as datasource - if defined"
-}
-
-variable "certificate_id" {
-  type    = string
-  default = null
-  description = "Certificate_id value to be used as datasource - if defined"
-}
+## TAGS ##
 
 variable "defined_tags" {
-  type    = map(string)
-  default = {}
+  type        = map(string)
+  default     = {}
   description = "Defined tags"
 }
 
 variable "freeform_tags" {
-  type    = map(string)
-  default = {}
+  type        = map(string)
+  default     = {}
   description = "Freeform tags"
 }
 
-variable "compartment_id" {
-  type = string
-  description = "Compartment id - mandatory - to be used as data source"
-}
+## DATASOURCE ##
 
 variable "subnet_id" {
-  type = string
+  type        = string
   description = "Subnet id - mandatory - to be used as data source"
+  default     = null
 }
+
+## RESOURCES ##
 
 variable "api" {
   type = list(object({
-    id            = number
-    content       = optional(string)
-    defined_tags  = optional(map(string))
-    display_name  = optional(string)
-    freeform_tags = optional(map(string))
+    id             = number
+    content        = optional(string)
+    defined_tags   = optional(map(string))
+    display_name   = optional(string)
+    freeform_tags  = optional(map(string))
+    compartment_id = any
   }))
-  default = []
+  default     = []
   description = <<EOF
 This resource provides the Api resource in Oracle Cloud Infrastructure API Gateway service.
 EOF
@@ -61,8 +46,9 @@ variable "certificate" {
     display_name              = optional(string)
     freeform_tags             = optional(map(string))
     intermediate_certificates = optional(string)
+    compartment_id            = optional(any)
   }))
-  default = []
+  default     = []
   description = <<EOF
 This resource provides the Certificate resource in Oracle Cloud Infrastructure API Gateway service.
 EOF
@@ -70,12 +56,13 @@ EOF
 
 variable "deployment" {
   type = list(object({
-    id            = number
-    gateway_id    = number
-    path_prefix   = string
-    display_name  = optional(string)
-    freeform_tags = optional(map(string))
-    defined_tags  = optional(map(string))
+    id             = number
+    gateway_id     = number
+    path_prefix    = string
+    compartment_id = optional(any)
+    display_name   = optional(string)
+    freeform_tags  = optional(map(string))
+    defined_tags   = optional(map(string))
     specification = optional(list(object({
       logging_policies = optional(list(object({
         access_log = optional(list(object({
@@ -501,7 +488,7 @@ variable "deployment" {
       })), [])
     })), [])
   }))
-  default = []
+  default     = []
   description = <<EOF
 This resource provides the Deployment resource in Oracle Cloud Infrastructure API Gateway service.
 EOF
@@ -512,7 +499,8 @@ variable "gateway" {
     id                         = number
     endpoint_type              = string
     subnet_id                  = string
-    certificate_id             = optional(number)
+    certificate_id             = optional(any)
+    compartment_id             = optional(any)
     defined_tags               = optional(map(string))
     display_name               = optional(string)
     freeform_tags              = optional(map(string))
@@ -537,7 +525,7 @@ variable "gateway" {
       })), [])
     })), [])
   }))
-  default = []
+  default     = []
   description = <<EOF
 This resource provides the Gateway resource in Oracle Cloud Infrastructure API Gateway service.
 EOF
@@ -545,17 +533,18 @@ EOF
 
 variable "subscriber" {
   type = list(object({
-    id            = number
-    usage_plans   = list(string)
-    defined_tags  = optional(map(string))
-    display_name  = optional(string)
-    freeform_tags = optional(map(string))
+    id             = number
+    usage_plans    = list(string)
+    compartment_id = optional(any)
+    defined_tags   = optional(map(string))
+    display_name   = optional(string)
+    freeform_tags  = optional(map(string))
     clients = list(object({
       name  = string
       token = string
     }))
   }))
-  default = []
+  default     = []
   description = <<EOF
 This resource provides the Subscriber resource in Oracle Cloud Infrastructure API Gateway service.
 EOF
@@ -563,10 +552,11 @@ EOF
 
 variable "usage_plans" {
   type = list(object({
-    id            = number
-    defined_tags  = optional(map(string))
-    display_name  = optional(string)
-    freeform_tags = optional(map(string))
+    id             = number
+    compartment_id = any
+    defined_tags   = optional(map(string))
+    display_name   = optional(string)
+    freeform_tags  = optional(map(string))
     entitlements = list(object({
       name        = string
       description = optional(string)
@@ -585,7 +575,7 @@ variable "usage_plans" {
       })), [])
     }))
   }))
-  default = []
+  default     = []
   description = <<EOF
 This resource provides the Usage Plan resource in Oracle Cloud Infrastructure API Gateway service.
 EOF
