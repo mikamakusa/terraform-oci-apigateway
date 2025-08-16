@@ -1,3 +1,6 @@
 [submodule "modules/terraform-oci-identity"]
 	path = modules/terraform-oci-identity
 	url = git@github.com:mikamakusa/terraform-oci-identity.git
+[submodule "modules/terraform-oci-logging"]
+	path = modules/terraform-oci-logging
+	url = git@github.com:mikamakusa/terraform-oci-logging.git

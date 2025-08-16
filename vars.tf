@@ -20,6 +20,20 @@ variable "subnet_id" {
   default     = null
 }
 
+## MODULES ##
+
+variable "compartment" {
+  type = any
+}
+
+variable "log_group" {
+  type = any
+}
+
+variable "log" {
+  type = any
+}
+
 ## RESOURCES ##
 
 variable "api" {

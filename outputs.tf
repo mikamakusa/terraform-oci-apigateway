@@ -34,7 +34,7 @@ output "usage_plan_id" {
 
 output "subscriber_id" {
   value = try(
-    oci_apigateway_subscriber.this.oci_apigateway_usage_plan.this.*.id
+    oci_apigateway_subscriber.this.*.id
     )
 }
 
@@ -42,6 +42,6 @@ output "subscriber_id" {
 
 output "api_id" {
   value = try(
-    oci_apigateway_api.this.oci_apigateway_usage_plan.this.*.id
+    oci_apigateway_api.this.*.id
     )
 }

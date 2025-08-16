@@ -1,6 +1,6 @@
 resource "oci_apigateway_api" "this" {
   count          = length(var.api)
-  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.api[count.index], "compartment_id")))
+  compartment_id = element(module.identity.compartment[0].compartment_id, lookup(var.api[count.index], "compartment_id"))
   content        = lookup(var.api[count.index], "content")
   defined_tags   = merge(var.defined_tags, lookup(var.api[count.index], "defined_tags"))
   display_name   = lookup(var.api[count.index], "display_name")
@@ -10,7 +10,7 @@ resource "oci_apigateway_api" "this" {
 resource "oci_apigateway_certificate" "this" {
   count                     = length(var.certificate)
   certificate               = lookup(var.certificate[count.index], "certificate")
-  compartment_id            = try(element(module.identity.*.compartment_id, lookup(var.certificate[count.index], "compartment_id")))
+  compartment_id            = element(module.identity.compartment[0].compartment_id, lookup(var.certificate[count.index], "compartment_id"))
   private_key               = lookup(var.certificate[count.index], "private_key")
   defined_tags              = merge(var.defined_tags, lookup(var.certificate[count.index], "defined_tags"))
   display_name              = lookup(var.certificate[count.index], "display_name")
@@ -20,8 +20,8 @@ resource "oci_apigateway_certificate" "this" {
 
 resource "oci_apigateway_deployment" "this" {
   count          = length(var.gateway) == "0" ? "0" : length(var.deployment)
-  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.deployment[count.index], "compartment_id")))
-  gateway_id     = try(element(oci_apigateway_gateway.this.*.id, lookup(var.deployment[count.index], "gateway_id")))
+  compartment_id = element(module.identity.compartment[0].compartment_id, lookup(var.deployment[count.index], "compartment_id"))
+  gateway_id     = element(oci_apigateway_gateway.this.*.id, lookup(var.deployment[count.index], "gateway_id"))
   path_prefix    = lookup(var.deployment[count.index], "path_prefix")
   display_name   = lookup(var.deployment[count.index], "display_name")
   defined_tags   = merge(var.defined_tags, lookup(var.deployment[count.index], "defined_tags"))
@@ -618,7 +618,7 @@ resource "oci_apigateway_deployment" "this" {
                     for_each = lookup(header_transformations.value, "set_headers") == null ? [] : ["set_headers"]
                     content {
                       dynamic "items" {
-                        for_each = ""
+                        for_each = lookup(set_headers.value, "items") == null ? [] : ["items"]
                         content {
                           name      = lookup(set_headers.value, "name")
                           values    = lookup(set_headers.value, "values")
@@ -770,7 +770,7 @@ resource "oci_apigateway_deployment" "this" {
 
 resource "oci_apigateway_gateway" "this" {
   count                      = length(var.certificate) == 0 ? 0 : length(var.gateway)
-  compartment_id             = try(element(module.identity.*.compartment_id, lookup(var.gateway[count.index], "compartment_id")))
+  compartment_id             = try(element(module.identity.compartment[0].compartment_id, lookup(var.gateway[count.index], "compartment_id")))
   endpoint_type              = lookup(var.gateway[count.index], "endpoint_type")
   subnet_id                  = data.oci_core_subnet.this.subnet_id
   certificate_id             = try(element(oci_apigateway_certificate.this.*.id, lookup(var.gateway[count.index], "certificate_id")))
@@ -813,7 +813,7 @@ resource "oci_apigateway_gateway" "this" {
 
 resource "oci_apigateway_subscriber" "this" {
   count          = length(var.usage_plans) == "0" ? "0" : length(var.subscriber)
-  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.subscriber[count.index], "compartment_id")))
+  compartment_id = try(element(module.identity.compartment[0].compartment_id, lookup(var.subscriber[count.index], "compartment_id")))
   usage_plans    = lookup(var.subscriber[count.index], "usage_plans")
   defined_tags   = merge(var.defined_tags, lookup(var.subscriber[count.index], "defined_tags"))
   display_name   = lookup(var.subscriber[count.index], "display_name")
@@ -830,7 +830,7 @@ resource "oci_apigateway_subscriber" "this" {
 
 resource "oci_apigateway_usage_plan" "this" {
   count          = length(var.usage_plans)
-  compartment_id = try(element(module.identity.*.compartment_id, lookup(var.usage_plans[count.index], "compartment_id")))
+  compartment_id = try(element(module.identity.compartment[0].compartment_id, lookup(var.usage_plans[count.index], "compartment_id")))
   defined_tags   = merge(var.defined_tags, lookup(var.usage_plans[count.index], "defined_tags"))
   display_name   = lookup(var.usage_plans[count.index], "display_name")
   freeform_tags  = merge(var.freeform_tags, lookup(var.usage_plans[count.index], "freeform_tags"))
