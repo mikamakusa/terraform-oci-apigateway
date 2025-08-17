@@ -17,6 +17,11 @@
 | <a name="module_identity"></a> [identity](#module\_identity) | ./modules/terraform-oci-identity | n/a |
 | <a name="module_logging"></a> [logging](#module\_logging) | ./modules/terraform-oci-logging | n/a |
 
+## Usage
+
+- [api](examples/api/main.tf)
+- [certificate](examples/certificate/main.tf)
+
 ## Resources
 
 | Name | Type |
